@@ -1,0 +1,7 @@
+<application>
+  <nav>
+    <view name="sanpath_overview" />
+    <view name="sanpath_metrics" />
+    <search label="TA-sanpath Events" search="search index=main sourcetype=sanpath:status" />
+  </nav>
+</application>

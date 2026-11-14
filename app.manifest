@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "2.0.0",
+  "info": {
+    "title": "Storage Path Health Add-on (Device-Mapper Multipath / iSCSI)",
+    "id": {
+      "group": null,
+      "name": "TA-sanpath",
+      "version": "1.0.0"
+    },
+    "author": [{"name":"Michael \"JKat54\" Bentley","email":"michael@bentleypc.com","company":"BentleyPC LLC"}],
+    "releaseDate": "11/14/2026",
+    "description": "Collects storage-path health from device-mapper-multipath (systool -C) and iSCSI sessions (iscsiadm): per-multipath active/failed path counts and path state, plus iSCSI session counts. Emits JSON events to index=main (sourcetype sanpath:status) and sanpath.* metrics to index=metrics (sourcetype sanpath:metrics). Hosts without multipath report 'absent' so coverage stays visible.",
+    "classification": {
+      "intendedAudience": "IT",
+      "categories": ["IT Operations"],
+      "developmentStatus": "Production/Latest"
+    },
+    "commonInformationModels": null,
+    "license": {
+      "name": "Source Available - Free personal use, commercial use requires paid license from BentleyPC LLC",
+      "text": "LICENSE",
+      "uri": null
+    },
+    "privacyPolicy": {
+      "name": null,
+      "text": null,
+      "uri": null
+    },
+    "releaseNotes": {
+      "name": null,
+      "text": null,
+      "uri": null
+    }
+  },
+  "dependencies": null,
+  "tasks": null,
+  "inputGroups": null,
+  "incompatibleApps": null,
+  "platformRequirements": null,
+  "supportedDeployments": [
+    "_standalone",
+    "_distributed"
+  ],
+  "targetWorkloads": ["_search_heads", "_indexers"]
+}

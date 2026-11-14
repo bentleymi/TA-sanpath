@@ -1,0 +1,54 @@
+TA-sanpath
+====
+
+Collects storage-path health from device-mapper-multipath (systool -C) and iSCSI sessions (iscsiadm): per-multipath active/failed path counts and path state, plus iSCSI session counts. Emits JSON events to index=main (sourcetype sanpath:status) and sanpath.* metrics to index=metrics (sourcetype sanpath:metrics). Hosts without multipath report 'absent' so coverage stays visible.
+
+Prerequisites
+-------------
+  * multipath-tools (systool) on hosts that use multipath; auto-detected
+  * iscsi-initiator-utils (iscsiadm) for iSCSI session counts; auto-detected
+  * Splunk Enterprise or Universal Forwarder 9.x - 10.6 (forwarder recommended
+    on monitored hosts).
+  * A metrics-typed index (default name: metrics) on the indexer:
+
+      [metrics]
+      datatype = metric
+
+    Forwarders only need that index to exist on the indexer side.
+  * No network egress, no root requirement beyond the Splunk service account.
+    Fully standalone add-on with no dependencies.
+
+Install
+-------
+Install on each monitored host (Apps > Install app from file, splunk install
+app, or deployment server), restart Splunk, then verify:
+
+  index=main sourcetype="sanpath:status" | head
+
+Search quick reference
+----------------------
+  index=main sourcetype="sanpath:status" | head
+  | mcatalog values(metric_name) where index=metrics metric_name="sanpath.*" by host
+  | mstats avg("sanpath.*") where index=metrics span=60s by host
+
+Usage
+-----
+Events: index=main sourcetype=sanpath:status  (per-multipath path state; iSCSI session list count)
+Metrics: sanpath.<mp>_active_paths / sanpath.<mp>_failed_paths / sanpath.iscsi_session_count
+Dashboards: TA-Sanpath > Sanpath Overview / Sanpath Metrics
+
+Configure
+---------
+Override the interval or destination index in etc/apps/TA-sanpath/local/inputs.conf
+(never edit default/).
+
+Troubleshooting
+---------------
+  * systool output only exists when the multipathd daemon is running and paths are present.
+  * Local-disk hosts are expected to report 'absent'.
+
+License
+-------
+SOURCE-AVAILABLE (see LICENSE) - free personal, educational and evaluation
+use; commercial or production use requires a paid license from BentleyPC
+LLC (https://www.bentleypc.com).
