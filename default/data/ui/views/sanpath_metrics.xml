@@ -1,51 +1,47 @@
 <dashboard version="1.1" theme="light">
   <label>TA-sanpath Metrics</label>
-  <description>Index-time metrics over index=metrics (sourcetype=sanpath:metrics)</description>
+  <description> Index-time metrics over index=metrics (sourcetype sanpath:metrics); series prefixed 'sanpath.'.</description>
   <row>
     <panel>
-      <title>All sanpath.* series</title>
+      <title>All sanpath.* series (counts + per-map path state)</title>
       <chart>
         <search>
           <query>| mstats avg("sanpath.*") as "v*" where index=metrics by metric_name span=5m
-| foreach v* [eval Value=coalesce(Value,&lt;&lt;FIELD&gt;&gt;)]
-| fields - v*
-| xyseries _time metric_name Value</query>
+| rename v* as "sanpath.*"</query>
           <done/>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.nullValueRendering">connect</option>
         <option name="charting.drilldown">none</option>
       </chart>
     </panel>
-      <panel>
-      <title>Paths (active / failed)</title>
+  </row>
+  <row>
+    <panel>
+      <title>Active paths (per map)</title>
       <chart>
         <search>
-          <query>| mstats avg("sanpath.*") as "v*" where index=metrics by metric_name span=5m
-| search metric_name IN ("*active_paths*","*failed_paths*","*multipath_count*")
-| foreach v* [eval Value=coalesce(Value,&lt;&lt;FIELD&gt;&gt;)]
-| fields - v*
-| xyseries _time metric_name Value</query>
+          <query>| mstats avg("sanpath.*_active_paths") as "v*" where index=metrics by metric_name span=5m
+| rename v* as "sanpath.*_active_paths"</query>
           <done/>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.nullValueRendering">connect</option>
         <option name="charting.drilldown">none</option>
       </chart>
     </panel>
-      <panel>
-      <title>iSCSI sessions</title>
+  </row>
+  <row>
+    <panel>
+      <title>Failed paths (per map)</title>
       <chart>
         <search>
-          <query>| mstats avg("sanpath.*") as "v*" where index=metrics by metric_name span=5m
-| search metric_name="*iscsi_session_count*"
-| foreach v* [eval Value=coalesce(Value,&lt;&lt;FIELD&gt;&gt;)]
-| fields - v*
-| xyseries _time metric_name Value</query>
+          <query>| mstats avg("sanpath.*_failed_paths") as "v*" where index=metrics by metric_name span=5m
+| rename v* as "sanpath.*_failed_paths"</query>
           <done/>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.nullValueRendering">connect</option>
         <option name="charting.drilldown">none</option>
       </chart>
     </panel>

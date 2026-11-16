@@ -3,43 +3,71 @@
   <description>Collects storage-path health from device-mapper-multipath (systool -C) and iSCSI sessions (iscsiadm): per-multipath active/failed path counts and path state, plus iSCSI session</description>
   <row>
     <panel>
-      <title>Hosts Reporting (latest)</title>
-      <table>
-        <search>
-          <query>index=main sourcetype="sanpath:status"
-| stats latest(_time) as "Last seen", count as Reports by host
-| table host "Last seen" Reports</query>
-          <done/>
-        </search>
-        <option name="drilldown">none</option>
-      </table>
-    </panel>
-  </row>
-  <row>
-    <panel>
-      <title>Distinct sanpath.* Metrics (last hour)</title>
+      <title>Multipath maps (per host, latest)</title>
       <single>
         <search>
-          <query>| mcatalog values(metric_name) as m where index=metrics metric_name="sanpath.*"
-| eval count=mvcount(m)</query>
+          <query>| mstats avg("sanpath.multipath_count") as value where index=metrics span=5m
+| fields - _time | tail 1</query>
           <done/>
         </search>
-        <option name="underLabel">sanpath.* metrics streaming</option>
+      </single>
+    </panel>
+    <panel>
+      <title>iSCSI sessions (per host, latest)</title>
+      <single>
+        <search>
+          <query>| mstats avg("sanpath.iscsi_session_count") as value where index=metrics span=5m
+| fields - _time | tail 1</query>
+          <done/>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>Active paths (fleet, latest)</title>
+      <single>
+        <search>
+          <query>index=main sourcetype="sanpath:status"
+| eventstats latest(_time) as lt by host
+| dedup host lt
+| rex field=_raw max_match=0 "\"active_paths\":\s*(?&lt;n&gt;[0-9]+)"
+| mvexpand n
+| stats sum(n) as value</query>
+          <done/>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>Failed paths (fleet, latest)</title>
+      <single>
+        <search>
+          <query>index=main sourcetype="sanpath:status"
+| eventstats latest(_time) as lt by host
+| dedup host lt
+| rex field=_raw max_match=0 "\"failed_paths\":\s*(?&lt;n&gt;[0-9]+)"
+| mvexpand n
+| stats sum(n) as value</query>
+          <done/>
+        </search>
       </single>
     </panel>
   </row>
   <row>
     <panel>
-      <title>Issues (newest first)</title>
+      <title>Multipath maps - latest per host</title>
       <table>
         <search>
-          <query>index=main sourcetype="sanpath:status" _raw="*alarm*"
-| sort - _time
-| table _time host _raw
-| rename _raw as Event
-| head 200</query>
+          <query>index=main sourcetype="sanpath:status"
+| dedup host
+| rex field=_raw max_match=0 "\"(?&lt;k&gt;[^\"]+)\":\s*(?&lt;o&gt;\{[^{}]*\})"
+| where match(o,"\"failed_paths\"") and k != "_count_only"
+| eval z=mvzip(k,o,"^^")
+| mvexpand z
+| rex field=z "^(?&lt;k&gt;[^^]+)\^\^(?&lt;o&gt;.+)$"
+| spath input=o path=active_paths | spath input=o path=failed_paths
+| table host k active_paths failed_paths</query>
           <done/>
         </search>
+        <option name="count">100</option>
         <option name="drilldown">none</option>
       </table>
     </panel>
