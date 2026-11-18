@@ -1,12 +1,14 @@
 TA-sanpath
 ====
 
-Collects storage-path health from device-mapper-multipath (systool -C) and iSCSI sessions (iscsiadm): per-multipath active/failed path counts and path state, plus iSCSI session counts. Emits JSON events to index=main (sourcetype sanpath:status) and sanpath.* metrics to index=metrics (sourcetype sanpath:metrics). Hosts without multipath report 'absent' so coverage stays visible.
+Collects storage-path health from device-mapper-multipath (multipath -l) and iSCSI sessions (iscsiadm -m session): per-multipath active/failed path counts and path state, plus iSCSI session counts. Emits JSON events to index=main (sourcetype sanpath:status) and sanpath.* metrics to index=metrics (sourcetype sanpath:metrics). Hosts without multipath report 'absent' so coverage stays visible.
 
 Prerequisites
 -------------
-  * multipath-tools (systool) on hosts that use multipath; auto-detected
-  * iscsi-initiator-utils (iscsiadm) for iSCSI session counts; auto-detected
+  * multipath-tools (multipath; collection shells out to `multipath -l`) on
+    hosts that use multipath; auto-detected
+  * iscsi-initiator-utils (iscsiadm; session counts via `iscsiadm -m session`)
+    for iSCSI session counts; auto-detected
   * Splunk Enterprise or Universal Forwarder 9.x - 10.6 (forwarder recommended
     on monitored hosts).
   * A metrics-typed index (default name: metrics) on the indexer:
@@ -44,7 +46,9 @@ Override the interval or destination index in etc/apps/TA-sanpath/local/inputs.c
 
 Troubleshooting
 ---------------
-  * systool output only exists when the multipathd daemon is running and paths are present.
+  * `multipath -l` output only exists when the multipathd daemon is running and paths are present.
+  * A failed/empty `multipath -l` while /sys/class/scsi_device and /run/multipathd.socket exist
+    reports 'permission_or_daemon_issue' instead of silently pretending multipath is absent.
   * Local-disk hosts are expected to report 'absent'.
 
 License
