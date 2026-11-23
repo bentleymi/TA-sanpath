@@ -7,12 +7,20 @@
       "name": "TA-sanpath",
       "version": "1.0.2"
     },
-    "author": [{"name":"Michael \"JKat54\" Bentley","email":"michael@bentleypc.com","company":"BentleyPC LLC"}],
+    "author": [
+      {
+        "name": "Michael \"JKat54\" Bentley",
+        "email": "michael@bentleypc.com",
+        "company": "BentleyPC LLC"
+      }
+    ],
     "releaseDate": "11/18/2026",
     "description": "Collects storage-path health from device-mapper-multipath (multipath -l) and iSCSI sessions (iscsiadm -m session): per-multipath active/failed path counts and path state, plus iSCSI session counts. Emits JSON events to index=main (sourcetype sanpath:status) and sanpath.* metrics to index=metrics (sourcetype sanpath:metrics). Hosts without multipath report 'absent' so coverage stays visible.",
     "classification": {
       "intendedAudience": "IT",
-      "categories": ["IT Operations"],
+      "categories": [
+        "IT Operations"
+      ],
       "developmentStatus": "Production/Latest"
     },
     "commonInformationModels": null,
@@ -41,5 +49,9 @@
     "_standalone",
     "_distributed"
   ],
-  "targetWorkloads": ["_search_heads", "_indexers"]
+  "targetWorkloads": [
+    "_search_heads",
+    "_indexers"
+  ],
+  "version": "1.0.8"
 }
